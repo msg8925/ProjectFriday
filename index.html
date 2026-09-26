@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Y7 Computing — Progress Test</title>
+<title>Online Test</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231B2B5E'/%3E%3Cpath d='M9 17l5 5 9-12' stroke='%230D9488' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 :root{
@@ -134,6 +134,12 @@ table.tk th{background:#EEF1F7;font-weight:600;font-size:15px}
 table.tk td.st{min-width:280px}
 table.tk td.c{text-align:center;width:90px}
 table.tk input{accent-color:var(--teal);width:20px;height:20px;cursor:pointer}
+table.gt{border-collapse:collapse;margin:6px 0}
+table.gt th,table.gt td{border:1.5px solid var(--navy);padding:6px 10px;text-align:center;vertical-align:middle}
+table.gt th{background:#EEF1F7;font-weight:600;font-size:15px}
+table.gt td.l{text-align:left}
+table.gt td.given{background:#F6F7FA;font-family:var(--mono)}
+table.gt select.sel{font-size:15px}
 table.pv{border-collapse:collapse;margin:6px 0}
 table.pv td{border:1.5px solid var(--navy);padding:8px 10px;text-align:center;font-family:var(--mono);font-size:17px;min-width:56px}
 select.sel{font:inherit;font-family:var(--mono);font-size:15.5px;padding:3px 6px;border:1.5px solid var(--navy);border-radius:4px;background:#F2F8F7;color:var(--ink);cursor:pointer}
@@ -141,9 +147,9 @@ pre.code select.sel{font-size:15px;padding:1px 4px;margin:-2px 0}
 table.pv select.sel{font-size:16px}
 .gapline{margin:8px 0}
 .match{display:grid;gap:10px}
-.match-row{display:grid;grid-template-columns:260px 1fr;gap:12px;align-items:center}
+.match-row{display:grid;grid-template-columns:220px 1fr;gap:12px;align-items:center}
 .match-row b{font-weight:600}
-.match select{font:inherit;padding:8px;border:1.5px solid var(--rule);border-radius:4px;width:100%;max-width:280px;background:#fff}
+.match select{font:inherit;padding:8px;border:1.5px solid var(--rule);border-radius:4px;width:100%;background:#fff}
 @media (max-width:640px){.match-row{grid-template-columns:1fr}.part{padding-right:0}.pmarks{position:static;display:block;text-align:right}}
 
 /* order */
@@ -309,6 +315,7 @@ EXAM.questions.forEach(function (q) {
 var TOTAL = PARTS.reduce(function (s, p) { return s + p.marks; }, 0);
 var DURATION = (EXAM.meta.durationMinutes || 30) * 60000;
 var SKEY = 'mbis-' + EXAM.meta.testId;
+document.title = EXAM.meta.year + ' ' + (EXAM.meta.subject || 'Computing') + ' — ' + EXAM.meta.title;
 
 /* ================================================================
    State (autosaved to this browser)
@@ -464,14 +471,14 @@ function renderPart(p, R) {
       if (!res && !Array.isArray(a)) h += '<div class="hint">Move at least one item to answer this question.</div>';
       break;
     case 'bits':
-      var bits = typeof a === 'string' ? a : '00000000';
-      h += '<div class="bits" role="group" aria-label="8 bits for ' + p.full + '">';
-      for (var b = 0; b < 8; b++) {
+      var nb = p.n || 8, bits = typeof a === 'string' ? a : new Array(nb + 1).join('0');
+      h += '<div class="bits" role="group" aria-label="' + nb + ' bits for ' + p.full + '">';
+      for (var b = 0; b < nb; b++) {
         var on = bits.charAt(b) === '1', bc = res && typeof a === 'string' ? (res.items[b] ? ' ok' : ' bad') : '';
-        h += '<button type="button" class="bit' + bc + '" data-pid="' + p.id + '" data-bit="' + b + '" aria-pressed="' + on + '" aria-label="Bit ' + (b + 1) + ' of 8, currently ' + (on ? 1 : 0) + '"' + dis + '>' + (on ? 1 : 0) + '</button>';
+        h += '<button type="button" class="bit' + bc + '" data-pid="' + p.id + '" data-bit="' + b + '" aria-pressed="' + on + '" aria-label="Bit ' + (b + 1) + ' of ' + nb + ', currently ' + (on ? 1 : 0) + '"' + dis + '>' + (on ? 1 : 0) + '</button>';
       }
       h += '</div>';
-      if (!res) h += '<div class="hint">Work out the place values on your paper. All bits start at 0.</div>';
+      if (!res) h += '<div class="hint">' + (p.hint || 'Work out the place values on your paper. All bits start at 0.') + '</div>';
       break;
     case 'errline':
       h += '<div class="codepick" role="radiogroup" aria-label="Lines of code for ' + p.full + '">';
@@ -639,7 +646,7 @@ function onClick(e) {
   }
   if (!pid) return;
   if (el.hasAttribute('data-bit')) {
-    var b = +el.getAttribute('data-bit'), cur = typeof A[pid] === 'string' ? A[pid] : '00000000';
+    var b = +el.getAttribute('data-bit'), cur = typeof A[pid] === 'string' ? A[pid] : new Array((PART[pid].n || 8) + 1).join('0');
     A[pid] = cur.slice(0, b) + (cur.charAt(b) === '1' ? '0' : '1') + cur.slice(b + 1);
     rerenderPart(pid, '[data-bit="' + b + '"]');
   } else if (el.hasAttribute('data-line')) {
@@ -899,7 +906,7 @@ function answerText(p) {
   return '';
 }
 function promptForReport(p) {
-  var h = '<b>' + esc(p.full) + '</b> ' + p.prompt;
+  var h = (p.lead ? '<div>' + p.lead + '</div>' : '') + '<b>' + esc(p.full) + '</b> ' + p.prompt;
   if (p.listing) h += '<pre>' + esc(p.listing) + '</pre>';
   if (p.type === 'errline') h += '<pre>' + p.lines.map(function (l, i) { return (i + 1) + '  ' + esc(l); }).join('\n') + '</pre>';
   if (p.type === 'select') {
