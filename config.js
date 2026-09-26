@@ -8,7 +8,7 @@ window.TEST_CONFIG = {
 
   // Google Apps Script web-app URL (README, step 2). While this is not set, the page
   // marks locally using teacher-only/answer-key.js, so you can preview it on your own computer.
-  appsScriptUrl: 'https://script.google.com/macros/s/AKfycby8NcN2c-LCUDNDWrQfo2DYx_bIImEa1ew90D-3MEnuFp8c2vjB2DQcj66bzjpwO-G_ww/exec',
+  appsScriptUrl: 'https://script.google.com/macros/s/AKfycbz9t9iQkQJiVEKqfI0MWuTRpB_M0aDZg-BXKe167C2T7veF1S7IzaMOQKacMy968urrqw/exec',
   // Must match SHARED_KEY in Code.gs. Stops random people posting to your script.
   sharedKey: '7Dh6#8&JggyHW@-Id%mNi8*$gGqJ^h',
 
